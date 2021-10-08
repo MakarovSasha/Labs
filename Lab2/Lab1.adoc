@@ -10,11 +10,18 @@
 добавить main код для зажигания светодиодов
 
 [source, cpp, linenums]
+
 ----
  RCC::AHB1ENR::GPIOAEN::Enable::Set() ;
   GPIOA::MODER::MODER5::Output::Set() ;
   GPIOA::ODR::ODR5::High::Set() ;
-  Не забыть подключить
+----
+
+* Не забыть подключить библиотеку для порта С
+
+[source, cpp, linenums]
+
+----
 #include "gpioaregisters.hpp" //for Gpioa
 ----
 * Пронаблюдать, что произошло на плате, все сфоткать.
@@ -54,7 +61,9 @@ image::check_1_%202021-09-30%20121318.png[Sunset,945,535]
 image::check_2_2021-09-30%20122320.png[Sunset,661,553]
 
 * Далее открываем проект lab1 и проверяем плату на прошиваемость
+
 [source, cpp, linenums]
+
 ----
  #include "rccregisters.hpp" // for RCC
  std::uint32_t SystemCoreClock = 16'000'000U;
@@ -82,7 +91,9 @@ int main()
 ----
 
 * Следующим пунктом реализуем зажигание диода
+
 [source, cpp, linenums]
+
 ----
 
  #include "rccregisters.hpp" // for RCC
