@@ -100,4 +100,4 @@ GPIOC :: ODR :: ODR9 :: Low :: Set ();
 .Результат программы
 [#img-sunset]
 [link=https://github.com/MakarovSasha/Labs/blob/main/Lab3]
-image::2_5404873719589900622.mp4[Sunset, 600, 441]
+image::2_5404873719589900622.gif[Sunset, 388, 690]
