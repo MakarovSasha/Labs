@@ -107,9 +107,9 @@ extern "C"
 === Результат пргограммы
 
 .Результат программы
-[# img-sunset]
+[#img-sunset]
 [link=https://github.com/MakarovSasha/Labs/blob/main/lab%204]
-image:: Result.gif [align=center]
+image::Result.gif[Sunset, 388, 690]
 
 = *Исключающее или*
 
