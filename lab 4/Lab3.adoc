@@ -26,7 +26,7 @@
 
 Подключим библиотеки для портов С и А;
 
-[источник, cpp, бельеуммы]
+[source, cpp, linenums]
 
 ----
 #include "gpioaregisters.hpp" // для GPIOC
@@ -34,13 +34,13 @@
 #include "rccregisters.hpp" // для RCC
 ----
 
-[источник, cpp, бельеуммы]
+[source, cpp, linenums]
 
 ----
 std :: uint32_t SystemCoreClock = 16'000'000U;
 ----
 
-[источник, cpp, бельеуммы]
+[source, cpp, linenums]
 
 ----
 extern "C"
@@ -108,8 +108,8 @@ extern "C"
 
 .Результат программы
 [# img-sunset]
-[ссылка = https://github.com/MakarovSasha/Labs/blob/main/lab%204]
-image :: VID_20211014_101116.gif [Закат, 388, 690]
+[link=https://github.com/MakarovSasha/Labs/blob/main/lab%204]
+image:: Result.gif [align=center]
 
 = *Исключающее или*
 
