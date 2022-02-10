@@ -8,16 +8,22 @@
 
 =  *Введение* +
 
-*Прерывание* - сигнал, сообщающий микропроцессору о наступлении какого-либо события от периферии. При этом
-выполнение текущей последовательности команд приостанавливается, и управление передаётся
+*Прерывание* - это сигнал, который сообщает микропроцессору о наступлении какого-либо события от периферии. При этом
+реализация текущей последовательности команд приостанавливается, и управление переходит
 обработчик прерывания, который реагирует на событие и обслуживает его, после чего возвращает
 управление в прерванный код. +
 
 *Вектор прерывания* - закреплённый за устройством номер, который идентифицирует соответствующий обработчик прерываний. Векторы прерываний объединяются в таблицу векторов прерываний, содержащую адреса обработчиков прерываний. +
 
+.Таблица векторов прерывания.
+[#img-sunset]
+[link=https://github.com/MakarovSasha/Labs/blob/main/Lab%201%20in%202022]
+image::bd573692ece043b7876df13a1f17cd84.jpg[Sunset, 659, 391]
+
+
 Управление и обработка прерываниями производится *контроллером приоритетных векторных прерываний* NVIC (Nested Vectored Interrupt Controller). Контроллер прерываний часть ядра Cortex-M.
 
-За работу прерываний отвечают несколько регистров: +
+За работу прерываний отвечают некоторые регистры: +
 
 * *ISER* - Interrupt Set Enable Register. Запись бита в нужную позицию включает прерывание записью 1.
 * *ISER* - Interrupt Clr Enable Register. Запись сюда наоборот выключает прерывание - записью 1.
@@ -60,18 +66,18 @@
     TIM3::CNT::Write(0); //начало отсчёта от 0
 
     NVIC::ISER0::Write(1<<29U); //разрешение глобальное прерывания вектора от TIM3
-    TIM3::DIER::UIE::Set(1); // разрешение прерывания по переполнению таймера
+    TIM3::DIER::UIE::Value1::Set(); // разрешение прерывания по переполнению таймера
     GPIOA::MODER::MODER3::Alternate::Set();
 
 Также как и с обработчиком прерывания TIM2, опишим обработчик прерывания TIM3 в файле startup, но уже в 29 векторе прерывания:
 
 
 [source, cpp]
- InterruptHandler::Timer2Handler,         //TIM2
+ InterruptHandler::Timer3Handler,         //TIM3
 
 
 
-=== Установим моргание светодиодов по прерыванию таймеров 2 и 3 +
+=== Установим моргание светодиодов по прерыванию таймеров +
 
 [source, cpp]
 static void DummyHandler() { for(;;) {} }
@@ -85,7 +91,7 @@ static void DummyHandler() { for(;;) {} }
     }
     static void Timer3Handler()
     {
-      if (TIM3::SR::UIF::UpdatePending::IsSet())
+      if (TIM3::SR::UIF::Value1::IsSet())
       {
         TIM2::SR::UIF::NoUpdate::Set();
         GPIOC::ODR::Toggle(1 << 5) ;
@@ -96,8 +102,10 @@ static void DummyHandler() { for(;;) {} }
 
 = *Результат*
 
-.Результат программы
-image::lab1-2022.gif[300,300]
+.Результат выполненной работы
+[#img-sunset]
+[link=https://github.com/MakarovSasha/Labs/blob/main/Lab%201%20in%202022]
+image::image.png[Sunset, 284, 227]
 
 
 
@@ -105,24 +113,24 @@ image::lab1-2022.gif[300,300]
 
 = *Схема в StarUML*
 
-Перед началом написания кода нам надо продумать архитектуру, которую мы будем воплащать. Для этого воспользуемся StarUML.
+Перед началом написания кода нужно продумать архитектуру, которая будет воплащать. Для этого воспользуемся программой StarUML.
 
-.Архитектура и взаимодействие класса в StarUML.
+.Архитектура и взаимодействие класса в программе StarUML.
 [#img-sunset]
 [link=https://github.com/MakarovSasha/Labs/blob/main/Lab%201%20in%202022]
 image::image.png[Sunset, 284, 227]
 
 
-= *Передача сообщений по USART через прерывание*
+== *Передача сообщений по USART через прерывание*
 Задача: передавать сообщение "Hello world". Нужно разрешить прерывание при передаче первой буквы и запретить его при передаче последней. Отправляя в регистор данных каждую последующую букву. +
-Перед тем как послать сообщение, строку нужно скопировать во внутренний буфер. Мы будем посылать из буфера только первый символ, а остальные через прерывание, вызывая OnByteTransmimit(). Передача длится пока строка не заполнится до нижного размера, тогда передача уже запрещается и её можно начать заного. +
 
-=== Создадим класс, который мы описали в StarUML.
+
+=== Создадим класс, который нами был описан в StarUML.
 
 [source, cpp]
 #pragma once
-#include <string>  // for std::string
-#include <array>  // for std::array
+#include <string>
+#include <array>
 class MessageTransmitter
 {
 public:
@@ -135,7 +143,7 @@ private:
 };
 
 
-=== Реализация метода
+=== Выполнение самого метода
 
 [source, cpp]
 #include "messagetransmitter.h"
@@ -164,7 +172,7 @@ void MessageTransmitter::OnByteTransmit() // Реализация метода O
   }
 }
 
-=== Устанавливаем в обработчик прерываний
+=== Внедряем в обработчик прерываний
 
 [source, cpp]
 class InterruptHandler {
@@ -179,14 +187,14 @@ static void Usart2Handler()
 };
 
 
-Вставим обработчик прерываний в файле startup:
+Пропишим обработчик прерываний в startup:
 
 [source, cpp]
  InterruptHandler::Timer2Handler,  //37
  InterruptHandler::Usart2Handler,  //USART2 38
 
 
-= *Код программы*
+== *Код программы*
 
 ===  InterruptHandler
 
@@ -228,34 +236,38 @@ class InterruptHandler {
 #endif
 
 
-=== Main.cpp
+=== main.cpp
 
 [source, cpp]
 #include "gpiocregisters.hpp" //for Gpioc
-#include "gpioaregisters.hpp"
+#include "gpioaregisters.hpp" //for Gpioa
 #include "rccregisters.hpp"   //for RCC
 #include "tim2registers.hpp"   //for TIM2
-#include "nvicregisters.hpp"  //for NVIC
 #include "tim3registers.hpp"  //for TIM3
+#include "nvicregisters.hpp"  //for NVIC
 #include "usart2register.hpp"
+
 using namespace std ;
+
 constexpr auto SystemClock = 16'000'000U;
 constexpr auto TimerClock = 1'000U;
 constexpr auto TimerPrescaller = SystemClock/TimerClock;
+
 extern "C"
 {
 int __low_level_init(void)
 {
-    //Switch on external 16 MHz oscillator
+
     RCC::CR::HSION::On::Set() ;
     while (!RCC::CR::HSIRDY::Ready::IsSet())
     {
     }
-    //Switch system clock on external oscillator
+
     RCC::CFGR::SW::Hsi::Set() ;
     while (!RCC::CFGR::SWS::Hsi::IsSet())
     {
     }
+
     RCC::AHB1ENR::GPIOAEN::Enable::Set();
     RCC::AHB1ENR::GPIOCEN::Enable::Set();
     GPIOC::MODER::MODER8::Output::Set();
@@ -277,7 +289,7 @@ int __low_level_init(void)
     TIM3::CNT::Write(0);
 
     NVIC::ISER0::Write(1<<29U);
-    TIM3::DIER::UIE::Set();
+    TIM3::DIER::UIE::Value1::Set();
 
     //Порт А2 и А3 на альтернативный режим работы
     GPIOA::MODER::MODER2::Alternate::Set();
@@ -296,6 +308,7 @@ int __low_level_init(void)
   return 1;
 }
 }
+
 void DelayMs (uint32_t value)
 {
   const auto delay = TimerClock * value/ 1000U ;
@@ -310,6 +323,7 @@ void DelayMs (uint32_t value)
   TIM2::SR::UIF::NoUpdate::Set();
   TIM2::CR1::CEN::Disable::Set();
 }
+
 int main()
 {
   std::string testMessage = "Hello world";
