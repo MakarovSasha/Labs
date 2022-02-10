@@ -123,7 +123,7 @@ image::image.png[Sunset, 284, 227]
 
 
 
-=== Создадим класс, который нами был описан в StarUML.
+=== Создание класса, описанного в StarUML.
 
 [source, cpp]
 #pragma once
@@ -141,7 +141,7 @@ private:
 };
 
 
-=== Выполнение самого метода
+=== Прописывание метода
 
 [source, cpp]
 #include "messagetransmitter.h"
@@ -170,7 +170,7 @@ void MessageTransmitter::OnByteTransmit() // Реализация метода O
   }
 }
 
-=== Внедряем в обработчик прерываний
+=== Внедрение в обработчик прерываний
 
 [source, cpp]
 class InterruptHandler {
@@ -192,9 +192,9 @@ static void Usart2Handler()
  InterruptHandler::Usart2Handler,  //USART2 38
 
 
-== *Код программы*
+== *Код работы*
 
-===  InterruptHandler
+===  Файл *InterruptHandler*
 
 [source, cpp]
 #ifndef REGISTERS_INTERRUPTHANDLER_HPP
@@ -234,7 +234,7 @@ class InterruptHandler {
 #endif
 
 
-=== main.cpp
+=== Файл *main.cpp*
 
 [source, cpp]
 #include "gpiocregisters.hpp" //for Gpioc
@@ -247,7 +247,11 @@ class InterruptHandler {
 
 using namespace std ;
 
-constexpr auto TimerPrescaller = 16'000U;
+constexpr auto SystemClock = 16'000'000U;
+constexpr auto TimerClock = 1'000U;
+constexpr auto TimerPrescaller = SystemClock/TimerClock;
+//constexpr auto Time = 0.5U;
+//constexpr auto Delay = 5000'000;
 
 extern "C"
 {
