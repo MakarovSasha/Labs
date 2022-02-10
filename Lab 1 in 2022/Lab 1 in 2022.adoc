@@ -121,7 +121,7 @@ image::image.png[Sunset, 284, 227]
 .Архитектура и взаимодействие класса в программе StarUML.
 [#img-sunset]
 [link=https://github.com/MakarovSasha/Labs/blob/main/Lab%201%20in%202022]
-image::image.png[Sunset, 284, 227]
+image::VID_20220210_212402.gif[Sunset, 284, 227]
 
 
 == *Передача сообщений по USART через прерывание*
