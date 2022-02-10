@@ -252,9 +252,7 @@ class InterruptHandler {
 
 using namespace std ;
 
-constexpr auto SystemClock = 16'000'000U;
-constexpr auto TimerClock = 1'000U;
-constexpr auto TimerPrescaller = SystemClock/TimerClock;
+constexpr auto TimerPrescaller = 16'000U;
 
 extern "C"
 {
