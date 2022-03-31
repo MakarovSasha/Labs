@@ -29,7 +29,7 @@
 .Схема платы
 [#img-sunset]
 [link=https://github.com/MakarovSasha/Labs/blob/main/Lab%206]
-image::image-otch51.png[Sunset, 388, 690]
+image::image-otch51.png[Sunset]
 
 На схеме можно увидить, что нужные порты для подключения светодиодов это:
 PА_5, PC_9, PC_8, PC_5, а также порт для подключения кнопки PC_13.
@@ -183,4 +183,4 @@ return 1;
 .Результат программы
 [#img-sunset]
 [link=https://github.com/MakarovSasha/Labs/blob/main/Lab%206]
-image::Lab%206.gif[Sunset, ]
+image::Lab%206.gif[Sunset]
