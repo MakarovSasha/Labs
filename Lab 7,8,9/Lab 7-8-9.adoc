@@ -25,9 +25,34 @@
 Можно сгенерировать заготовки классов прямо из программы. Можно сделать все самим. По архитектуре написать и реализовать классы и потом и логику работы + программы. Все это должно быть в отчете.
 ----
 
-= *Схема в StarUML*
+= *Методология объектно-ориентированного программирования*
 
 Для того, чтобы графически отобразить архитектуру классов, воспользуемся программой StarUML.
+
+Объектно-ориентированное программирование (ОПП) - совокупность принципов, технлогий, а также инструментальных средств для создания программных систем на основе архитектуры взаимодействия объектов.+
+
+Основные принципы ОПП: абстракция, наследование, инкапсуляция и полиморфизм.
+
+. *Абстракция данных* - выделение значимой информации и исключение из рассмотрения незначимой. В ООП
+рассматривают лишь абстракцию данных, подразумевая набор значимых характеристик объекта, доступный остальной программе (пример абстракция Человека, которая характеризуется только двумя параметрами Рост и Вес и цвет глаз).
+
+. *Наследование* - свойство системы, позволяющее описать новый класс на основе уже существующего с частично или
+полностью заимствующейся функциональностью. Класс, от которого производится наследование, называется базовым,
+родительским или суперклассом.
+
+. *Класс* представляет собой обетракцию совокупности реальных объектов, которые имеют общий набор свойста и обладают одинаковым поведением, Класс является описываемой на языке терминологии исходного кода моделью ещё не существующей сущности (объекта). Фактически он описывает устройство объекта, являясь своего рода чертежом.
+
+. *Объект* в контексте ООП рассматривается как экземпляр соответствующего класса. (например, классом может являться
+фрукт, а экземпляр класса фрукт - яблоко).
+
+Прежде чем приступить к написанию кода нужно разработать структуру или архитектуру программы. Она будет включать:
+
+. Интерфейсы (абстрактный класс) для кнопки и светодиода.
+
+. Контейнер (контроллер) для светодиодов, который содержит в себе массив указателей на интерфейс. Контроллер светодиодов должен поддерживать 3 режима работы светодоиодов (моргают все светодиоды (режим моргунчик, класс All), режим "елочка" (класс Tree), режим "шахматы" (класс Chess)).
+
+
+= *Архитектура классов в StarUML*
 
 .Архитектура и взаимодействие классов в StarUML.
 [#img-sunset]
@@ -35,106 +60,134 @@
 image::a9.png[Sunset]
 
 == *Создание классов*
-Для дальнейшего выполнения задания нужно создать классы. Ниже приведены используемые классы.
 
-=== Класс Leds
+Для дальнейшего выполнения задания нужно создать виртуальные классы. Ниже приведены используемые классы.
+
+Виртуальный класс *IButton* содержит интерфейс работы кнопки.
+
+[source, cpp]
+#pragma once
+class IButton
+{
+public:
+virtual bool IsPressed() = 0;
+};
+
+
+Виртуальный класс *ILed* реализует интерфейс работы светодиодов.
+
+[source, cpp]
+#pragma once
+class ILed
+{
+public:
+virtual void toggle() = 0;
+virtual void switchoff() = 0;
+};
+
+
+Виртуальный класс *IMode*, поскольку для построения модов в функции должно меняться значение индекса, поэтому константой ее оставлять нельзя.
+
+[source, cpp]
+#pragma once
+class IMode
+{
+public:
+virtual void toggle() const = 0;
+virtual void init() const = 0;
+};
+
+Виртуальное наследование в языке программирования C++ — один из вариантов наследования, который нужен для решения некоторых проблем, порождаемых наличием возможности множественного наследования (особенно «ромбовидного наследования»), путём разрешения неоднозначности того, методы которого из суперклассов (непосредственных классов-предков) необходимо использовать. Оно применяется в тех случаях, когда множественное наследование вместо предполагаемой полной композиции свойств классов-предков приводит к ограничению доступных наследуемых свойств вследствие неоднозначности. Базовый класс, наследуемый множественно, определяется виртуальным с помощью ключевого слова virtual.
+
+
+=== *Класс Leds*
+
+В классе *Leds* используется функции описанные в классе Led для массива светодиодов.
+
+[source, c]
+#pragma once
+#include "iLed.h"
+#include "Leed.h"
+#include "gpioaregisters.hpp" //for GPIOC
+#include "gpiocregisters.hpp" //for GPIOC
+template <auto* ...pArgs>
+struct Leds
+{
+ILed* pLeds[sizeof ...(pArgs)] = {pArgs...};
+void toggle()
+{
+for (auto it: pLeds)
+{
+it-> toggle();
+}
+}
+     void switchoff()
+    {
+      for (auto it: pLeds)
+      {
+        it->switchoff();
+      }
+    }
+};
+
+
+=== *Класс Led*
+
+Класс *Led* отвечает за моргание светодиодов. Класс является шаблонным, поэтому нам необходимы два регистра:ODR и BSRR. Функция Toggle реализует мигание светодиодов, а функция Switchoff необходима для отключения светодиодов.
+
 [source, c]
 #pragma once
 #include "gpiocregisters.hpp" //for GPIOC
 #include "gpioaregisters.hpp"
-class Led
-{
-public:
-void delay (uint32_t value)
-{
-for(uint32_t i = 0; i < value; ++i)
-{
-asm volatile ("");
-}
-}
-public:
-void Option1()
-{
-        GPIOC::ODR::ODR5::High::Set() ;
-        delay(500000);
-        GPIOC::ODR::ODR8::High::Set() ;
-        delay(500000);
-        GPIOC::ODR::ODR9::High::Set() ;
-        delay(500000);
-        GPIOA::ODR::ODR5::High::Set() ;
-        delay(500000);
-        GPIOA::ODR::ODR5::Low::Set() ;
-        delay(500000);
-        GPIOC::ODR::ODR9::Low::Set() ;
-        delay(500000);
-        GPIOC::ODR::ODR8::Low::Set() ;
-        delay(500000);
-        GPIOC::ODR::ODR5::Low::Set() ;
-        delay(500000);
-}
-public:
-void Option2()
-{
-        GPIOA::ODR::ODR5::High::Set() ;
-        GPIOC::ODR::ODR5::High::Set() ;
-        GPIOC::ODR::ODR8::High::Set() ;
-        GPIOC::ODR::ODR9::High::Set() ;
-        delay(500000);
-        GPIOA::ODR::ODR5::Low::Set() ;
-        GPIOC::ODR::ODR5::Low::Set() ;
-        GPIOC::ODR::ODR8::Low::Set() ;
-        GPIOC::ODR::ODR9::Low::Set() ;
-        delay(500000);
-}
-}
-;
-
-=== Класс Led
-
-[source, c]
-#pragma once
-#include "gpiocregisters.hpp" //for GPIOC
+#include "iLed.h" // for ILed
 template<typename Port, uint32_t pinNum>
-class Led
+class Led : public ILed
 {
 public:
-  void Toggle(); // публичный метод toogle
-  {
-   Port::BSRR::Write(pinNum << 16);
-  }
-}
-;
+   void toggle() override
+    {
+      Port::ODR::Toggle(1U << pinNum);
+    }
+   void switchoff() override
+    {
+      Port::BSRR::Write(pinNum << 16);
+    }
+};
 
-=== Класс Button
+=== *Класс Button*
+
+Класс *Button* отвечает за кнопку, с помощью которой реализуется переключение модов. Данный класс основан на булевой логике, также предусмотрена защита от дребезга, то есть при нажатии на кнопку программа не должна проскакивать несколько режимов, а работать корректно.
 
 [source, c]
 #pragma once
 #include "gpiocregisters.hpp"
-class Button
+#include "IButton.h"
+template<typename Port, uint32_t pinNum>
+class Button: public IButton
 {
- void delay1 (uint32_t value)
+public:
+  void delay1 (uint32_t value)
 {
 for(uint32_t i = 0; i < value; ++i)
 {
- asm volatile ("");
+    asm volatile ("");
 }
 }
-public:
-bool IsPressed()
-{
- bool result = false;
- if (GPIOC::IDR::IDR13::Low::IsSet()) // регистр IDR отвечает за считывание значений порта
-  {
-  delay1(1000000);
-  result = true;
-  }
+  bool IsPressed() override
+ {
+   bool result = false;
+   if ((Port::IDR::Get()&(1U << pinNum)) != (1<< pinNum))
+   {
+     delay1(3000000U);
+    result = true;
+   }
  return result;
-}
-}
-;
+ }
+};
 
-=== Класс All
-Класс All, отвечает за моргание светодиодов. В нем реализованно 2 операции toggle() и init().
+=== *Класс All*
+
+Класс *All*, отвечает за то, что светодиоды загораются и гаснут одновременн. В нем реализованно 2 операции toggle() и init().
 
 [source,c]
 #pragma once
@@ -151,37 +204,38 @@ public:
   {
     TLeds.switchoff();
   }
-}
-;
+};
 
-=== Класс Chess
-Класс Chess реализован для попеременног моргания 1 и 3, 2 и 4 светодиодов.
+=== *Класс Chess*
 
-[source, c]
+Класс *Chess* реализует режим "Шахматы", то есть загораются сначала первый и второй и гаснут, далее загораются третий, четвертый и гаснут соответственно.
+
+[source, cpp]
 #pragma once
 #include "imode.h"
-template <auto& TLeds> // ссылка на контейнер TLeds
-class Chess : public IMode // класс chess наследует публичный класс IMode
+template <auto& TLeds>
+class Chess : public IMode
 {
 public:
-  void toggle() const override // поскольку переопределяем метод абстрактного класса IMode, то нужен override
+  void toggle() const override
  {
-   TLeds.toggle(); //
+   TLeds.toggle();
  }
   void init() const override
  {
-    for ( uint32_t index =0; index < std::size(TLeds.pLeds); ++index) // реализация метода init для затушения светодиодов
+    for ( uint32_t index =0; index < std::size(TLeds.pLeds); ++index)
   {
-   if ((index %2)==0) // елси остаток от деления = 0
+   if ((index %2)==0)
     {
-     TLeds.pLeds[index]->toggle(); // то надо переключить светодиоды
+     TLeds.pLeds[index]->toggle();
     }
   }
  }
-}
-;
+};
 
-=== Класс Tree
+=== *Класс Tree*
+
+Класс *Tree* реализует режим "Ёлочка", то есть светодиоды загораются поочередно и гаснут одновременно.
 
 [source, c]
 #pragma once
@@ -205,10 +259,11 @@ void init() const override
 {
    TLeds.switchoff();
 }
-}
-;
+};
 
-=== Класс Modes (для переключения режимов)
+=== *Класс Modes*
+
+Класс *Modes* помогает нам осуществить переключение написанных выше режимов.С помощью изменения индекса мода на единицу.
 
 [source, c]
 #pragma once
@@ -232,24 +287,25 @@ public:
 private:
   uint32_t modeIndex = 0;
   IMode* pModes[sizeof ...(pArgs)] = {pArgs...};
- }
-;
+ };
 
-=== Код Main
+=== *Класс Main*
+
+В классе *Main* реализуется настройка генератора частоты, светодиодов и таймера.
 
 [source, c]
 #include "gpioaregisters.hpp" //for GPIOC
 #include "gpiocregisters.hpp" //for GPIOC
 #include "rccregisters.hpp"   //for RCC
 #include <iostream>
-#include "Led.h" // for Led
-#include "Button.h" // for Button
-#include "iLed.h" // for iLed
-#include "leds.h" // for Leds
-#include "chess.h" // for Chess
-#include "All.h" // for All
-#include "Tree.h" // for Tree
-#include "modes.h" // for Modes
+#include "Leed.h"
+#include "Button.h"
+#include "iLed.h"
+#include "leds.h"
+#include "chess.h"
+#include "All.h"
+#include "Tree.h"
+#include "modes.h"
 #include "tim2registers.hpp"   //for SPI2
 #include "nvicregisters.hpp"  //for NVIC
 using namespace std ;
@@ -302,13 +358,13 @@ void delayMs(uint32_t value)
   TIM2::SR::UIF::NoInterruptPending::Set();
   TIM2::CR1::CEN::Disable::Set();
 }
-Led<GPIOC, 5U> led1; // указываем на каком порту находится светодиод
-Led<GPIOC, 8U> led2; // и какими портами моргать
+Led<GPIOC, 5U> led1;
+Led<GPIOC, 8U> led2;
 Led<GPIOC, 9U> led3;
 Led<GPIOA, 5U> led4;
-Leds<&led1, &led2, &led3, &led4 >leds; // создали объект класса Leds, а также передали указатели на те светодиоды, которыми хотим моргать
+Leds<&led1, &led2, &led3, &led4 >leds;
 Button<GPIOC, 13U> userButton;
-Chess<leds> chessMode; // передали список светодиодов
+Chess<leds> chessMode;
 All<leds> allMode;
 Tree<leds> treeMode;
 Modes<&allMode, &treeMode, &chessMode> modes;
@@ -320,7 +376,7 @@ int main()
     if (userButton.IsPressed())
    {
      modes.nextMode();
-     delay += 50U; // опрашиваем кнопку
+     delay += 50U;
    }
     modes.update();
    delayMs(delay);
@@ -334,7 +390,7 @@ return 1;
 
 == *Результат*
 
-.Результат программы
+.Результат реализации программы
 [#img-sunset]
 [link=https://github.com/MakarovSasha/Labs/blob/main/Lab%207%2C8%2C9]
 image::Lab%207-9.gif[Sunset]
