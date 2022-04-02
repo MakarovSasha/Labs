@@ -195,11 +195,11 @@ for(uint32_t i = 0; i < value; ++i)
 [source,c]
 #pragma once
 #include "imode.h"
-template <auto& TLeds>
-class All : public IMode
+template <auto& TLeds> //Ссылаемся на контейнер TLeds
+class All : public IMode //Наследуем публичный класс IMode.
 {
 public:
-  void toggle() const override
+  void toggle() const override // Override нужен поскольку переопределяем метод абстрактного класса IMode
   {
     TLeds.toggle();
   }
@@ -230,7 +230,7 @@ public:
   {
    if ((index %2)==0)
     {
-     TLeds.pLeds[index]->toggle();
+     TLeds.pLeds[index]->toggle(); //Если получаем остаток от деления равный нулю, переключаем светодиоды.
     }
   }
  }
@@ -297,8 +297,8 @@ private:
 В классе *Main* реализуется настройка генератора частоты, светодиодов и таймера.
 
 [source, c]
-#include "gpioaregisters.hpp" //for GPIOC
 #include "gpiocregisters.hpp" //for GPIOC
+#include "gpioaregisters.hpp" //for GPIOC
 #include "rccregisters.hpp"   //for RCC
 #include <iostream>
 #include "Leed.h"
