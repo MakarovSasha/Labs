@@ -1007,7 +1007,7 @@ class Humidity
 .Класс HumidityTask.
 [#img-sunset]
 [link=https://github.com/MakarovSasha/Labs/blob/main/Curs]
-image::HumTask.jpg[Sunset]
+image::HumTask1.jpg[Sunset]
 
 Рассмотрим файл описания данного класса - файл _HumidityTask.h_.
 Так как устройство работает под управлением операционной системы реального времени FreeRTOS
